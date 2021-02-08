@@ -21,5 +21,7 @@ ostream& operator<< (ostream& os, Foo &f) {
 int main () {
 	Foo f = {1};
 	cout << f << endl;
+
+	cout << ((-1 + 5) % 5) << endl;
 	return 0;
 }
