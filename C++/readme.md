@@ -226,14 +226,15 @@ RAII可被总结如下：
   - 析构函数释放资源并且永不抛出异常
 - 总是通过RAII类的实例使用资源，具体形式是以下两者之一
   - 实例在自动存储区（局部作用域变量），或者具有零时生命周期
-  - 实例的生命周期与自动或者零时对象绑定
+  - 实例的生命周期与自动或者临时对象绑定
 
 
 
 C++标准库中的`lock_guard`使用RAII方式控制互斥量。
 
 ```c++
-template <class Mutex> class lock_guard {
+template <class Mutex> 
+class lock_guard {
 private:
     Mutex& mutex_;
 

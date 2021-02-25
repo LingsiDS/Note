@@ -17,9 +17,17 @@ void foo(int &x) {
 	process(x);
 }
 
+template <typename T>
+void bar(T &&x) {
+	process(std::forward<T>(x));
+}
+
 int main () {
 	int x = 1;
 	foo(x);	
 	foo(std::move(x));
+
+	bar(x);
+	bar(std::move(x));
 	return 0;
 }

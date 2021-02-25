@@ -81,6 +81,7 @@ public:
 
 	}
 	~unique_ptr() {
+		cout << "~unique_ptr()" << endl;
 		delete ptr_;
 	}
 	T* get() const {
@@ -97,9 +98,62 @@ public:
 	//拷贝构造和拷贝赋值，第三种方案，指针的移动语义
 	template <typename U>	//实现子类指针向基类指针的转换
 	unique_ptr(unique_ptr<U>&& other) {	//定义移动构造函数，拷贝构造函数被禁用
+		cout << "unique_ptr(unique_ptr<U>&& other): " << *other << endl;
 		ptr_ = other.release();
 	}
-	//赋值函数的行为是移动还是拷贝，完全依赖于构造函数时走的是移到构造还是拷贝构造
+	unique_ptr(const unique_ptr &other) = delete;
+
+	//赋值函数的行为是移动还是拷贝，完全依赖于构造函数时走的是移动构造还是拷贝构造
+	unique_ptr& operator=(unique_ptr rhs) {
+		rhs.swap(*this);
+		return *this;
+	}
+
+
+	T* release() {		//让出指针
+		T* ptr = ptr_;
+		ptr_ = nullptr;
+		return ptr;
+	}
+	void swap(unique_ptr& rhs) {//交换两个指针的指向
+		using std::swap;
+		swap(ptr_, rhs.ptr_);
+	}
+
+private:
+	T* ptr_;
+};
+
+template <typename T>
+class unique_ptr <T[]>{
+public:
+	explicit unique_ptr(T* ptr = nullptr): ptr_(ptr) {
+
+	}
+	~unique_ptr() {
+		cout << "~unique_ptr()" << endl;
+		delete[] ptr_;
+	}
+	T* get() const {
+		return ptr_;
+	}
+
+	//运算符重载，使其看起来更像一个指针
+	T& operator*() const { return *ptr_; }
+	T* operator->() const { return ptr_; }
+	operator bool() const { return ptr_; }
+
+
+
+	//拷贝构造和拷贝赋值，第三种方案，指针的移动语义
+	template <typename U>	//实现子类指针向基类指针的转换
+	unique_ptr(unique_ptr<U>&& other) {	//定义移动构造函数，拷贝构造函数被禁用
+		cout << "unique_ptr(unique_ptr<U>&& other): " << *other << endl;
+		ptr_ = other.release();
+	}
+	unique_ptr(const unique_ptr &other) = delete;
+
+	//赋值函数的行为是移动还是拷贝，完全依赖于构造函数时走的是移动构造还是拷贝构造
 	unique_ptr& operator=(unique_ptr rhs) {
 		rhs.swap(*this);
 		return *this;
@@ -232,19 +286,25 @@ shared_ptr<T> dynamic_pointer_cast(const shared_ptr<U>& other) {
 }
 
 int main() {
-	shared_ptr<circle> ptr1(new circle());
-	printf("use count of ptr1 is %ld\n", ptr1.use_count());
+	// shared_ptr<circle> ptr1(new circle());
+	// printf("use count of ptr1 is %ld\n", ptr1.use_count());
 
-	shared_ptr<shape> ptr2;
-	printf("use count of ptr2 is %ld\n", ptr2.use_count());
+	// shared_ptr<shape> ptr2;
+	// printf("use count of ptr2 is %ld\n", ptr2.use_count());
 
-	ptr2 = ptr1;
-	printf("use count of ptr1 is %ld\n", ptr1.use_count());
-	printf("use count of ptr2 is %ld\n", ptr2.use_count());
+	// ptr2 = ptr1;
+	// printf("use count of ptr1 is %ld\n", ptr1.use_count());
+	// printf("use count of ptr2 is %ld\n", ptr2.use_count());
 
 
-	shared_ptr<circle> ptr3 = dynamic_pointer_cast<circle>(ptr2);
-	printf("use count of ptr3 is %ld\n", ptr3.use_count());
+	// shared_ptr<circle> ptr3 = dynamic_pointer_cast<circle>(ptr2);
+	// printf("use count of ptr3 is %ld\n", ptr3.use_count());
 
+
+	unique_ptr<int> up1(new int(1));
+	// cout << *up1 << endl;
+	unique_ptr<int> up2(new int(2));
+	// unique_ptr<int> up3(new int(3));
+	up1 = std::move(up2);
 	return 0;
 }

@@ -237,7 +237,7 @@ f(std::move(w));			//右值传递给f，T的推导结果为Widget
 
 
 
-### 不完美的转发，std::forward产生的原因
+### 不完美的转发，std::forward使用场景
 
 
 
@@ -270,6 +270,18 @@ int main () {
 ```
 
 在上述代码中`foo(std::move(x));`，匹配了`void foo(int &&x)`函数，并且在该函数中调用了`process`函数，而此时的关键问题是匹配哪一个`process`函数，直觉上来说，此时参数`x`是右值引用，应该调用`void process(int &&x)`，但是其实不然，因为**类型是右值引用的变量是一个左值**，即`x`是一个左值，故最终调用了`void process(int &x)`。这种特性可以看做**右值引用变量`x`在转发（x作为实参传递）过程中丢失了右值的属性**，所以被称为**不完美的转发**，要使用完美的转发应该在上面代码第13行用注释内容替换该行的代码，这样处理后`foo(int &&x)`中的`process`就会匹配到`void process(int &&x)`了。
+
+
+
+```c++
+template <typename T>
+void bar(T &&x) {
+	process(std::forward<T>(x));//对万能引用使用std::forward，当x为右值引用类型时，std::forward返回右值引用，进行完美转发
+}
+
+bar(x);
+bar(std::move(x));
+```
 
 
 
